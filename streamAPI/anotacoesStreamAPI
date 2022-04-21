@@ -1,0 +1,15 @@
+Tipos de Operação
+
+Built Ops = Operação de Construção, constrói o stream com base nas entradas e retorna uma stream.
+
+Int Ops = Operação Intermediária, processa os dados da stream, recebe uma stream e retorna 
+uma stream.
+
+Terminal Ops = Operação Terminal (Final), recebe uma stream e retorna algum outro valor final com 
+base nos dados da stream.
+
+Stream Sequencial = Os elementos de uma stream são executados de uma maneira sequencial e 
+mais devagar.
+
+Stream Paralelo = Os elementos de uma stream podem ser executados de maneira paralela, definido a
+prioridade internamente pela linguagem.
