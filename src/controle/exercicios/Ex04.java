@@ -1,0 +1,34 @@
+package controle.exercicios;
+
+import java.util.Scanner;
+
+public class Ex04 {
+	public static void main(String[] args) {
+		/*
+		 * Criar um programa que receba um número e diga se ele é um número primo.
+		 */
+		Scanner teclado = new Scanner(System.in);
+		
+		System.out.println("Digite um número: ");
+		int numero = teclado.nextInt();
+		boolean numeroDivisivelPorOutros = false;
+		
+		if(numero > 1) {
+			for(int i = 1; i <= numero; i++)
+				if(numero % i == 0) {
+					if(i != 1 && numero != i) {
+						System.out.println("Não é primo");
+						numeroDivisivelPorOutros = true;
+						break;
+					}
+				}
+		
+		
+			if(!numeroDivisivelPorOutros) {
+				System.out.println("É primo");
+			}
+		} else System.out.println("Não é primo");
+		
+		teclado.close();
+	}
+}
