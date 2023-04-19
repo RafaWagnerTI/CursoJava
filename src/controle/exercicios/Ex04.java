@@ -14,19 +14,17 @@ public class Ex04 {
 		boolean numeroDivisivelPorOutros = false;
 		
 		if(numero > 1) {
-			for(int i = 1; i <= numero; i++)
-				if(numero % i == 0) {
-					if(i != 1 && numero != i) {
-						System.out.println("Não é primo");
-						numeroDivisivelPorOutros = true;
-						break;
-					}
+			for(int i = 2; i <= numero; i++)
+				if(numero % i == 0 && numero != i ) {
+					numeroDivisivelPorOutros = true;
+					System.out.println("Não é primo");
+					break;
 				}
-		
 		
 			if(!numeroDivisivelPorOutros) {
 				System.out.println("É primo");
 			}
+			
 		} else System.out.println("Não é primo");
 		
 		teclado.close();
