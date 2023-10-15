@@ -1,7 +1,12 @@
 package ti.wagner.rafa.cm.modelo;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 public class Campo {
 
@@ -12,20 +17,21 @@ public class Campo {
 	private boolean minado = false;
 	private boolean marcado = false;
 	
-	private static final String ANSI_RESET = "\u001B[0m";
-	private static final String ANSI_RED = "\u001B[31m";
-	private static final String ANSI_GREEN = "\u001B[32m";
-	private static final String ANSI_YELLOW = "\u001B[33m";
-	private static final String ANSI_BLUE = "\u001B[34m";
-	private static final String ANSI_PURPLE = "\u001B[35m";
-	private static final String ANSI_CYAN = "\u001B[36m";
-	private static final String ANSI_BLACK = "\u001B[30m";
-	
 	private List<Campo> vizinhos = new ArrayList<>();
+	private List<CampoObservador> observadores = new ArrayList<>();
 	
 	Campo(int linha, int coluna) {
 		this.linha = linha;
 		this.coluna = coluna;
+	}
+	
+	public void registrarObservador(CampoObservador observador) {
+		observadores.add(observador);
+	}
+	
+	private void notificarObservadores(CampoEvento evento) {
+		observadores.stream()
+			.forEach(o -> o.eventoOcorreu(this, evento));
 	}
 	
 	boolean adicionarVizinho(Campo candidatoVizinho) {
@@ -48,20 +54,28 @@ public class Campo {
 		}
 	}
 	
-	void alternarMarcacao() {
+	public void alternarMarcacao() {
 		if(!aberto) {
 			marcado = !marcado;
+			
+			if(marcado) {
+				notificarObservadores(CampoEvento.MARCAR);
+			} else {
+				notificarObservadores(CampoEvento.DESMARCAR);
+			}
 		}
 	}
 	
-	boolean abrir() {
+	public boolean abrir() {
 		
 		if(!aberto && !marcado) {
-			aberto = true;
 			
 			if(minado) {
-				// TODO implementar nova versão
+				notificarObservadores(CampoEvento.EXPLODIR);
+				return true;
 			}
+			
+			setAberto(true);
 			
 			if(vizinhancaSegura()) {
 				vizinhos.forEach(v -> v.abrir());
@@ -73,7 +87,7 @@ public class Campo {
 		}
 	}
 	
-	boolean vizinhancaSegura() {
+	public boolean vizinhancaSegura() {
 		return vizinhos.stream().noneMatch(c -> c.minado);
 	}
 	
@@ -96,6 +110,10 @@ public class Campo {
 	
 	void setAberto(boolean aberto) {
 		this.aberto = aberto;
+		
+		if(aberto) {
+			notificarObservadores(CampoEvento.ABRIR);
+		}
 	}
 	
 	public boolean isAberto() {
@@ -124,41 +142,32 @@ public class Campo {
 		return desvendado || protegido;
 	}
 	
-	long minasNaVizinhanca() {
-		return vizinhos.stream().filter(v -> v.minado).count();
+	public int minasNaVizinhanca() {
+		return (int) vizinhos.stream().filter(v -> v.minado).count();
 	}
 	
 	void reiniciar() {
 		aberto = false;
 		minado = false;
 		marcado = false;
-	}
-	
-	public String toString() {
-		if(marcado) {
-			return ANSI_BLACK + "x" + ANSI_RESET;
-		} else if(aberto && minado) {
-			return "*";
-		} else if(aberto && minasNaVizinhanca() > 0) {
-			int minasNaVizinhanca = Integer.parseInt(Long.toString(minasNaVizinhanca()));
-			switch(minasNaVizinhanca) {
-				case 1: return ANSI_RED + minasNaVizinhanca + ANSI_RESET;
-				case 2: return ANSI_GREEN + minasNaVizinhanca + ANSI_RESET;
-				case 3: return ANSI_BLUE + minasNaVizinhanca + ANSI_RESET;
-				case 4: return ANSI_YELLOW + minasNaVizinhanca + ANSI_RESET;
-				case 5: return ANSI_PURPLE + minasNaVizinhanca + ANSI_RESET;
-				case 6: return ANSI_CYAN + minasNaVizinhanca + ANSI_RESET;
-				case 7: return ANSI_RED + minasNaVizinhanca + ANSI_RESET;
-				case 8: return ANSI_PURPLE + minasNaVizinhanca + ANSI_RESET;
-				default: return Long.toString(minasNaVizinhanca());
-			}
-		} else if(aberto) {
-			return " ";
-		} else return "?";
-		
+		notificarObservadores(CampoEvento.REINICIAR);
 	}
 	
 	public long quantidadeVizinhos() {
 		return vizinhos.stream().count();
 	}
+	
+	public void reproduzirSom(String nomeArquivo) {
+		try {
+			AudioInputStream ais = AudioSystem.getAudioInputStream(new File("sons/campo/" + nomeArquivo).getAbsoluteFile());
+		    Clip clip = AudioSystem.getClip();
+		    clip.open(ais);
+		    clip.start();
+		} 
+		catch(Exception ex) {
+			System.out.println("Erro ao reproduzir o Som");
+			ex.printStackTrace();
+		}
+	}
+
 }
