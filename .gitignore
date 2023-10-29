@@ -20,10 +20,11 @@ local.properties
 .classpath
 .settings/
 .loadpath
+.idea/
 
 # External tool builders
 .externalToolBuilders/
 
 # Locally stored "Eclipse launch configurations"
 *.launch
-/bin/
+**/bin/**
